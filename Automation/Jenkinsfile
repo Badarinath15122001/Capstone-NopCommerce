@@ -1,30 +1,60 @@
 pipeline {
     agent any
+
     environment {
-        PATH = "C:\\WebDrivers\\ChromeDriver;${env.PATH}"  // your driver path
+        MAVEN_HOME = 'C:\\apache-maven-3.9.11' // update if needed
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21'      // update if needed
+        PATH = "${env.MAVEN_HOME}\\bin;${env.JAVA_HOME}\\bin;${env.PATH}"
     }
+
     stages {
-        stage('Checkout') {
+
+        stage('Checkout SCM') {
             steps {
                 checkout scm
             }
         }
+
         stage('Build') {
             steps {
-                bat 'mvn clean install -DskipTests'
+                dir('Automation') { // run Maven in the correct folder
+                    bat 'mvn clean install -DskipTests'
+                }
             }
         }
+
         stage('Run Tests') {
             steps {
-                bat 'mvn test'
+                dir('Automation') {
+                    bat 'mvn test'
+                }
+            }
+        }
+
+        stage('Publish TestNG Reports') {
+            steps {
+                dir('Automation/test-output') {
+                    publishHTML([allowMissing: false,
+                                 alwaysLinkToLastBuild: true,
+                                 keepAll: true,
+                                 reportDir: '.',
+                                 reportFiles: 'testng-results.xml',
+                                 reportName: 'TestNG Report'])
+                }
             }
         }
     }
+
     post {
         always {
-            // Publish TestNG reports
-            testngPublisher testNGResults: 'Automation/target/surefire-reports/testng-results.xml', 
-                             allowMissing: false
+            echo 'Cleaning up workspace...'
+            cleanWs()
+        }
+        success {
+            echo 'Build and Tests completed successfully!'
+        }
+        failure {
+            echo 'Build or Tests failed!'
         }
     }
 }
