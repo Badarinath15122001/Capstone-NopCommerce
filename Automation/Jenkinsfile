@@ -1,45 +1,30 @@
 pipeline {
     agent any
-
-    tools {
-        jdk 'jdk21'      // update with your exact JDK name
-        maven 'M3'       // update with your exact Maven name
-    }
-
     environment {
-        MAVEN_OPTS = "-Xmx2048m"
+        PATH = "C:\\WebDrivers\\ChromeDriver;${env.PATH}"  // your driver path
     }
-
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
         stage('Build') {
             steps {
-                dir('Automation') {   // 👈 Go into Automation folder
-                    echo "Building project with Maven..."
-                    bat 'mvn -B -DskipTests clean package'
-                }
+                bat 'mvn clean install -DskipTests'
             }
         }
-
         stage('Run Tests') {
             steps {
-                dir('Automation') {   // 👈 Stay inside Automation folder
-                    echo "Running TestNG + Cucumber tests..."
-                    bat 'mvn -B test'
-                }
+                bat 'mvn test'
             }
-            post {
-                always {
-                    junit 'Automation/target/surefire-reports/*.xml'
-                    archiveArtifacts artifacts: 'Automation/reports/ExtentReports/*.html', fingerprint: true
-                    archiveArtifacts artifacts: 'Automation/target/cucumber-reports/*.html', fingerprint: true
-                }
-            }
+        }
+    }
+    post {
+        always {
+            // Publish TestNG reports
+            testngPublisher testNGResults: 'Automation/target/surefire-reports/testng-results.xml', 
+                             allowMissing: false
         }
     }
 }
