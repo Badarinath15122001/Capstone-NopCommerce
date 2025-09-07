@@ -2,27 +2,45 @@ package pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class HomePage {
+
     private WebDriver driver;
-    public HomePage(WebDriver driver) { this.driver = driver; }
+    private WebDriverWait wait;
 
-    private By loginLink = By.linkText("Log in");
-    private By registerLink = By.linkText("Register");
-    private By wishlistLink = By.linkText("Wishlist");
-    private By cartLink = By.linkText("Shopping cart");
-    private By compareLink = By.linkText("Compare products list");
+    // Locators
+    private By loginLink = By.cssSelector(".ico-login");
     private By searchBox = By.id("small-searchterms");
-    private By searchBtn = By.cssSelector("button[type='submit'][class*='search-box-button']");
-    private By newsletter = By.id("newsletter-email");
-    private By newsletterBtn = By.id("newsletter-subscribe-button");
+    private By searchButton = By.cssSelector("button[type='submit']");
+    private By twitterLink = By.cssSelector("a[href='https://twitter.com/nopCommerce']");
 
-    public void goTo(String url) { driver.get(url); }
-    public void clickLogin() { driver.findElement(loginLink).click(); }
-    public void clickRegister() { driver.findElement(registerLink).click(); }
-    public void clickWishlist() { driver.findElement(wishlistLink).click(); }
-    public void clickCart() { driver.findElement(cartLink).click(); }
-    public void clickCompare() { driver.findElement(compareLink).click(); }
-    public void search(String text) { driver.findElement(searchBox).clear(); driver.findElement(searchBox).sendKeys(text); driver.findElement(searchBtn).click(); }
-    public void subscribe(String email) { driver.findElement(newsletter).clear(); driver.findElement(newsletter).sendKeys(email); driver.findElement(newsletterBtn).click(); }
+    public HomePage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
+
+    public String getPageTitle() {
+        return driver.getTitle();
+    }
+
+    public void clickLogin() {
+        WebElement login = wait.until(ExpectedConditions.elementToBeClickable(loginLink));
+        login.click();
+    }
+
+    public void searchProduct(String product) {
+        WebElement searchInput = wait.until(ExpectedConditions.visibilityOfElementLocated(searchBox));
+        searchInput.clear();
+        searchInput.sendKeys(product);
+        driver.findElement(searchButton).click();
+    }
+    public String getTwitterLink() {
+        WebElement twitter = wait.until(ExpectedConditions.visibilityOfElementLocated(twitterLink));
+        return twitter.getAttribute("href");
+    }
 }

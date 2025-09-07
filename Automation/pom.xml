@@ -1,84 +1,129 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.automation</groupId>
-  <artifactId>Automation</artifactId>
-  <version>1.0-SNAPSHOT</version>
 
-  <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+    <modelVersion>4.0.0</modelVersion>
 
-  <dependencies>
-    <!-- Selenium -->
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-java</artifactId>
-      <version>4.21.0</version>
-    </dependency>
+    <groupId>com.nopcommerce</groupId>
+    <artifactId>automation-framework</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-    <!-- TestNG -->
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>7.10.2</version>
-      <scope>test</scope>
-    </dependency>
+    <name>nopCommerce Automation Framework</name>
 
-    <!-- Cucumber -->
-    <dependency>
-      <groupId>io.cucumber</groupId>
-      <artifactId>cucumber-java</artifactId>
-      <version>7.18.1</version>
-    </dependency>
-    <dependency>
-      <groupId>io.cucumber</groupId>
-      <artifactId>cucumber-testng</artifactId>
-      <version>7.18.1</version>
-    </dependency>
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <selenium.version>4.35.0</selenium.version>
+        <extent.version>5.0.9</extent.version>
+        <testng.version>7.11.0</testng.version>
+        <wdm.version>5.9.2</wdm.version>
+        <commons.io.version>2.15.1</commons.io.version>
+    </properties>
 
-    <!-- Extent Reports -->
-    <dependency>
-      <groupId>com.aventstack</groupId>
-      <artifactId>extentreports</artifactId>
-      <version>5.0.9</version>
-    </dependency>
+    <dependencies>
+        <!-- Selenium -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
 
-    <!-- WebDriverManager -->
-    <dependency>
-      <groupId>io.github.bonigarcia</groupId>
-      <artifactId>webdrivermanager</artifactId>
-      <version>5.7.0</version>
-    </dependency>
+        <!-- DevTools binding for Chrome 139 -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-devtools-v139</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
 
-    <!-- JUnit (optional) -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+        <!-- WebDriverManager -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>${wdm.version}</version>
+        </dependency>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
-      </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
-        <configuration>
-          <suiteXmlFiles>
-            <suiteXmlFile>testng.xml</suiteXmlFile>
-          </suiteXmlFiles>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+        <!-- TestNG -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ExtentReports -->
+        <dependency>
+            <groupId>com.aventstack</groupId>
+            <artifactId>extentreports</artifactId>
+            <version>${extent.version}</version>
+        </dependency>
+
+        <!-- Apache Commons IO (for screenshots) -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons.io.version}</version>
+        </dependency>
+        <!-- Cucumber -->
+    	<dependency>
+    		<groupId>io.cucumber</groupId>
+    		<artifactId>cucumber-java</artifactId>
+    		<version>7.15.0</version>
+		</dependency>
+
+		<!-- Cucumber TestNG -->
+		<dependency>
+    		<groupId>io.cucumber</groupId>
+    		<artifactId>cucumber-testng</artifactId>
+    		<version>7.15.0</version>
+		</dependency>
+
+		<!-- Cucumber PicoContainer (for DI in steps) -->
+		<dependency>
+    		<groupId>io.cucumber</groupId>
+    		<artifactId>cucumber-picocontainer</artifactId>
+    		<version>7.15.0</version>
+		</dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Surefire Plugin to run TestNG -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <useFile>false</useFile> <!-- ensures console shows pass/fail -->
+                    <suiteXmlFiles>
+                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
+            </plugin>
+            <plugin>
+    <groupId>net.masterthought</groupId>
+    <artifactId>maven-cucumber-reporting</artifactId>
+    <version>5.7.4</version>
+    <executions>
+        <execution>
+            <id>cucumber-report</id>
+            <phase>verify</phase>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+            <configuration>
+                <jsonFiles>
+                    <param>target/cucumber.json</param>
+                </jsonFiles>
+                <reportOutputDirectory>target/cucumber-html-reports</reportOutputDirectory>
+                <buildNumber>1</buildNumber>
+                <projectName>Demo NopCommerce</projectName>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+        </plugins>
+    </build>
+	
 </project>

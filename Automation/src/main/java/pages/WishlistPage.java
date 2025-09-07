@@ -4,19 +4,29 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class WishlistPage {
+
     private WebDriver driver;
-    public WishlistPage(WebDriver d){ this.driver = d; }
 
-    private By wishlistRows = By.cssSelector("table.wishlist-table tbody tr");
-    private By addToCartBtns = By.cssSelector("button[name^='addtocartbutton']");
+    public By clickElectronics = By.linkText("Electronics");
+    public By clickCellPhones = By.linkText("Cell phones");
+    public By selectProduct = By.linkText("Samsung Galaxy S24 256GB");
+    public By addToWishlistButton = By.xpath("//button[@id='add-to-wishlist-button-22']");
+    private By successMessage = By.cssSelector(".bar-notification.success");
+    private By footerWishlistLink = By.xpath("//a[@href='/wishlist' and text()='Wishlist']");
 
-    public int getWishlistCount() {
-        return driver.findElements(wishlistRows).size();
+    public WishlistPage(WebDriver driver) {
+        this.driver = driver;
     }
 
-    public void addFirstToCart() {
-        if (driver.findElements(addToCartBtns).size() > 0) {
-            driver.findElements(addToCartBtns).get(0).click();
-        }
+    public void addProductToWishlist() {
+        driver.findElement(addToWishlistButton).click();
+    }
+
+    public String getSuccessMessage() {
+        return driver.findElement(successMessage).getText();
+    }
+
+    public void openWishlistFromFooter() {
+        driver.findElement(footerWishlistLink).click();
     }
 }
