@@ -1,52 +1,45 @@
 pipeline {
-  agent any
+    agent any
 
-  tools {
-    jdk 'jdk21'      // must match name in Jenkins → Global Tool Config
-    maven 'M3'   // must match name in Jenkins → Global Tool Config
-  }
-
-  environment {
-    MAVEN_OPTS = "-Xmx2048m"
-  }
-
-  stages {
-    stage('Checkout') {
-      steps { checkout scm }
+    tools {
+        jdk 'jdk21'      // update with your exact JDK name
+        maven 'M3'       // update with your exact Maven name
     }
 
-    stage('Build') {
-      steps {
-        script {
-          if (isUnix()) {
-            sh 'mvn -B -DskipTests clean package'
-          } else {
-            bat 'mvn -B -DskipTests clean package'
-          }
-        }
-      }
+    environment {
+        MAVEN_OPTS = "-Xmx2048m"
     }
 
-    stage('Run Tests') {
-      steps {
-        script {
-          if (isUnix()) {
-            sh 'mvn -B test'
-          } else {
-            bat 'mvn -B test'
-          }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
         }
-      }
 
-      post {
-        always {
-          // collect JUnit/TestNG xmls (covers common locations)
-          junit '**/TEST-*.xml'
-
-          // archive reports and cucumber json
-          archiveArtifacts artifacts: 'reports/ExtentReports/*.html, test-output/**/*.html, target/cucumber-reports/*.html, target/cucumber.json', fingerprint: true
+        stage('Build') {
+            steps {
+                dir('Automation') {   // 👈 Go into Automation folder
+                    echo "Building project with Maven..."
+                    bat 'mvn -B -DskipTests clean package'
+                }
+            }
         }
-      }
+
+        stage('Run Tests') {
+            steps {
+                dir('Automation') {   // 👈 Stay inside Automation folder
+                    echo "Running TestNG + Cucumber tests..."
+                    bat 'mvn -B test'
+                }
+            }
+            post {
+                always {
+                    junit 'Automation/target/surefire-reports/*.xml'
+                    archiveArtifacts artifacts: 'Automation/reports/ExtentReports/*.html', fingerprint: true
+                    archiveArtifacts artifacts: 'Automation/target/cucumber-reports/*.html', fingerprint: true
+                }
+            }
+        }
     }
-  }
 }
