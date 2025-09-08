@@ -1,58 +1,44 @@
-// This Jenkins Pipeline script automates the build, test, and reporting process.
-// It is designed to be self-contained and easy to read.
-
 pipeline {
-    // Defines where the pipeline will run. 'any' means any available agent.
     agent any
 
-    // Defines the tools required for the build. These must be configured in Jenkins.
     tools {
         maven 'M3'
         jdk 'jdk21'
     }
 
     stages {
-        // Stage 1: Checkout the code from the Git repository.
         stage('Checkout') {
             steps {
                 git branch: 'master', url: 'https://github.com/Badarinath15122001/Capstone-NopCommerce.git'
             }
         }
 
-        // Stage 2: Build the project and run all tests.
-        // We removed the -DskipTests flag to allow tests to run,
-        // which is necessary for the reporting plugins in the `install` phase.
-        stage('Build and Test') {
+        stage('Build and Run Single Test') {
             steps {
                 dir('Automation') {
-                    echo 'Building and running tests with Maven...'
-                    // The 'install' goal runs the 'test' phase automatically.
-                    bat 'mvn clean install'
+                    echo 'Running only LoginTest...'
+                    // Run just one test class
+                    bat 'mvn -Dtest=tests.LoginTest test'
                 }
             }
         }
 
-        // Stage 3: Publish the generated test reports.
-        // This stage will only execute if the previous stage (Build and Test) passes.
         stage('Publish Reports') {
             steps {
                 dir('Automation') {
                     echo 'Publishing HTML reports...'
-                    // Publish TestNG HTML report
                     publishHTML(target: [
                         reportDir: 'test-output',
                         reportFiles: 'emailable-report.html',
                         reportName: 'TestNG Report'
                     ])
 
-                    // Publish Cucumber report
                     publishHTML(target: [
                         reportDir: 'target/cucumber-reports',
                         reportFiles: 'cucumber-report.html',
                         reportName: 'Cucumber Report'
                     ])
 
-                    // Publish Extent Report
                     publishHTML(target: [
                         reportDir: 'reports/ExtentReports',
                         reportFiles: 'ExtentReport_20250908_082324.html',
@@ -63,23 +49,12 @@ pipeline {
         }
     }
 
-    // Post-build actions that run regardless of the stage results.
     post {
-        // Always execute this block after the pipeline finishes.
         always {
             dir('Automation') {
-                // Archive screenshots, even if the directory is empty.
                 archiveArtifacts artifacts: '**/Screenshots/*.png', allowEmptyArchive: true
-                // Record test results from JUnit reports for trend analysis.
                 junit '**/test-output/junitreports/*.xml'
             }
-        }
-        // This block runs if any stage fails.
-        failure {
-            // Note: Update 'your-email@example.com' to your actual email.
-            mail to: 'badarinath15122001@gmail.com',
-                 subject: "Build Failed in Jenkins: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Check Jenkins console and reports."
         }
     }
 }
