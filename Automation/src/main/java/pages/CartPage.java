@@ -23,7 +23,7 @@ public class CartPage {
     private By addToCartButton = By.cssSelector("button[id^='add-to-cart-button']");
     private By successMessage = By.cssSelector(".bar-notification.success");
     private By cartLinkFooter = By.xpath("//a[@href='/cart' and text()='Shopping cart']");
-    private By cartTotal = By.cssSelector(".order-total .value-summary");
+    
     private By cartQty = By.cssSelector("span.cart-qty");
 
     // Actions
@@ -37,7 +37,7 @@ public class CartPage {
         try {
             return wait.until(ExpectedConditions.visibilityOfElementLocated(successMessage)).getText();
         } catch (TimeoutException e) {
-            // fallback if notification disappears quickly
+            
             return "Added to cart (qty=" + driver.findElement(cartQty).getText() + ")";
         }
     }
@@ -48,18 +48,5 @@ public class CartPage {
         
     }
 
-    public double getProductPriceByProductName(String keyword) {
-        WebElement row = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//tr[@class='cart-item-row']//a[contains(text(),'" + keyword + "')]/ancestor::tr")
-        ));
-        String priceText = row.findElement(By.cssSelector("td.subtotal span"))
-                .getText().replace("$", "").trim();
-        return Double.parseDouble(priceText);
-    }
-
-    public double getCartTotal() {
-        try { Thread.sleep(5000); } catch (InterruptedException e) { e.printStackTrace(); }
-        String totalText = wait.until(ExpectedConditions.visibilityOfElementLocated(cartTotal)).getText();
-        return Double.parseDouble(totalText.replace("$", "").trim());
-    }
+    
 }

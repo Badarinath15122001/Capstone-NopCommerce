@@ -1,60 +1,65 @@
 pipeline {
     agent any
 
-    environment {
-        MAVEN_HOME = 'C:\\apache-maven-3.9.11' // update if needed
-        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21'      // update if needed
-        PATH = "${env.MAVEN_HOME}\\bin;${env.JAVA_HOME}\\bin;${env.PATH}"
+    tools {
+        maven 'M3'   // Make sure Maven is configured in Jenkins
+        jdk 'jdk21'      // Ensure JDK version matches your project
     }
 
     stages {
-
-        stage('Checkout SCM') {
+        stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'master', url: 'https://github.com/Badarinath15122001/Capstone-NopCommerce.git'
             }
         }
 
         stage('Build') {
             steps {
-                dir('Automation') { // run Maven in the correct folder
-                    bat 'mvn clean install -DskipTests'
-                }
+                sh 'mvn clean install -DskipTests'
             }
         }
 
         stage('Run Tests') {
             steps {
-                dir('Automation') {
-                    bat 'mvn test'
-                }
+                sh 'mvn test'
             }
         }
 
-        stage('Publish TestNG Reports') {
+        stage('Publish Reports') {
             steps {
-                dir('Automation/test-output') {
-                    publishHTML([allowMissing: false,
-                                 alwaysLinkToLastBuild: true,
-                                 keepAll: true,
-                                 reportDir: '.',
-                                 reportFiles: 'testng-results.xml',
-                                 reportName: 'TestNG Report'])
-                }
+                // Publish TestNG HTML report
+                publishHTML(target: [
+                    reportDir: 'test-output',
+                    reportFiles: 'emailable-report.html',
+                    reportName: 'TestNG Report'
+                ])
+
+                // Publish Cucumber report
+                publishHTML(target: [
+                    reportDir: 'target/cucumber-reports',
+                    reportFiles: 'report.html',
+                    reportName: 'Cucumber Report'
+                ])
+
+                // Publish Extent Report
+                publishHTML(target: [
+                    reportDir: 'reports',
+                    reportFiles: 'ExtentReport.html',
+                    reportName: 'Extent Report'
+                ])
             }
         }
     }
 
     post {
         always {
-            echo 'Cleaning up workspace...'
-            cleanWs()
-        }
-        success {
-            echo 'Build and Tests completed successfully!'
+            archiveArtifacts artifacts: '**/Screenshots/*.png', allowEmptyArchive: true
+            junit '**/test-output/junitreports/*.xml'
         }
         failure {
-            echo 'Build or Tests failed!'
+            mail to: 'your-email@example.com',
+                 subject: "Build Failed in Jenkins: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "Check Jenkins console and reports."
         }
     }
 }
