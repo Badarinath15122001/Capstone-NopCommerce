@@ -39,11 +39,7 @@ pipeline {
                         reportName: 'Cucumber Report'
                     ])
 
-                    publishHTML(target: [
-                        reportDir: 'reports/ExtentReports',
-                        reportFiles: 'ExtentReport_20250908_082324.html',
-                        reportName: 'Extent Report'
-                    ])
+                    
                 }
             }
         }
