@@ -17,7 +17,7 @@ pipeline {
             steps {
                 dir('Automation') {
                     echo 'Running only LoginTest...'
-                    // Run just one test class
+                    // Runs only LoginTest.java
                     bat 'mvn -Dtest=tests.LoginTest test'
                 }
             }
@@ -27,19 +27,20 @@ pipeline {
             steps {
                 dir('Automation') {
                     echo 'Publishing HTML reports...'
+
+                    // Publish TestNG HTML report
                     publishHTML(target: [
                         reportDir: 'test-output',
                         reportFiles: 'emailable-report.html',
                         reportName: 'TestNG Report'
                     ])
 
+                    // Publish Extent Report
                     publishHTML(target: [
-                        reportDir: 'target/cucumber-reports',
-                        reportFiles: 'cucumber-report.html',
-                        reportName: 'Cucumber Report'
+                        reportDir: 'reports/ExtentReports',
+                        reportFiles: '*.html',
+                        reportName: 'Extent Report'
                     ])
-
-                    
                 }
             }
         }
