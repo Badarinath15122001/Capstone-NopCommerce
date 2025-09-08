@@ -48,14 +48,14 @@ pipeline {
                     // Publish Cucumber report
                     publishHTML(target: [
                         reportDir: 'target/cucumber-reports',
-                        reportFiles: 'report.html',
+                        reportFiles: 'cucumber-report.html',
                         reportName: 'Cucumber Report'
                     ])
 
                     // Publish Extent Report
                     publishHTML(target: [
-                        reportDir: 'reports',
-                        reportFiles: 'ExtentReport.html',
+                        reportDir: 'reports/ExtentReports',
+                        reportFiles: 'ExtentReport_20250908_082324.html',
                         reportName: 'Extent Report'
                     ])
                 }

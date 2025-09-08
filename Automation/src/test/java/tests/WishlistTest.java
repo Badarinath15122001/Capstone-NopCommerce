@@ -34,7 +34,7 @@ public class WishlistTest {
         String message = addToWishlistPage.getSuccessMessage();
         Assert.assertTrue(message.contains("The product has been added to your wishlist"),
                 "❌ Product not added to wishlist! Message: " + message);
-
+        try { Thread.sleep(10000); } catch (InterruptedException e) { e.printStackTrace(); }
         System.out.println("✅ Samsung Galaxy S24 added to wishlist successfully!");
     }
 
