@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'M3'      // Name as configured in Jenkins
-        jdk 'jdk21'     // Name as configured in Jenkins
+        maven 'M3'   // Ensure Maven is configured in Jenkins
+        jdk 'jdk21'   // Ensure JDK version matches your project
     }
 
     stages {
@@ -15,53 +15,59 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat 'mvn clean install -DskipTests'
+                dir('Automation') {   // Move into the Automation folder
+                    bat 'mvn clean install -DskipTests'
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat 'mvn test'
+                dir('Automation') {
+                    bat 'mvn test'
+                }
             }
         }
 
         stage('Publish Reports') {
             steps {
-                // Publish TestNG HTML report
-                publishHTML(target: [
-                    reportDir: 'test-output',
-                    reportFiles: 'emailable-report.html',
-                    reportName: 'TestNG Report'
-                ])
+                dir('Automation') {
+                    // Publish TestNG HTML report
+                    publishHTML(target: [
+                        reportDir: 'test-output',
+                        reportFiles: 'emailable-report.html',
+                        reportName: 'TestNG Report'
+                    ])
 
-                // Publish Cucumber report
-                publishHTML(target: [
-                    reportDir: 'target/cucumber-reports',
-                    reportFiles: 'report.html',
-                    reportName: 'Cucumber Report'
-                ])
+                    // Publish Cucumber report
+                    publishHTML(target: [
+                        reportDir: 'target/cucumber-reports',
+                        reportFiles: 'report.html',
+                        reportName: 'Cucumber Report'
+                    ])
 
-                // Publish Extent Report
-                publishHTML(target: [
-                    reportDir: 'reports',
-                    reportFiles: 'ExtentReport.html',
-                    reportName: 'Extent Report'
-                ])
+                    // Publish Extent Report
+                    publishHTML(target: [
+                        reportDir: 'reports',
+                        reportFiles: 'ExtentReport.html',
+                        reportName: 'Extent Report'
+                    ])
+                }
             }
         }
     }
 
     post {
         always {
-            archiveArtifacts artifacts: '**/Screenshots/*.png', allowEmptyArchive: true
-            junit '**/test-output/junitreports/*.xml'
+            dir('Automation') {
+                archiveArtifacts artifacts: '**/Screenshots/*.png', allowEmptyArchive: true
+                junit '**/test-output/junitreports/*.xml'
+            }
         }
         failure {
-            // Disable mail until SMTP is configured
-            echo "❌ Build failed! Configure SMTP to enable email alerts."
-        }
-        success {
-            echo "✅ Build succeeded!"
+            mail to: 'your-email@example.com',
+                 subject: "Build Failed in Jenkins: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "Check Jenkins console and reports."
         }
     }
 }
