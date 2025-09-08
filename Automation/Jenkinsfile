@@ -17,7 +17,6 @@ pipeline {
             steps {
                 dir('Automation') {
                     echo 'Running only LoginTest...'
-                    // Runs only LoginTest.java
                     bat 'mvn -Dtest=tests.LoginTest test'
                 }
             }
@@ -38,7 +37,7 @@ pipeline {
                     // Publish Extent Report
                     publishHTML(target: [
                         reportDir: 'reports/ExtentReports',
-                        reportFiles: '*.html',
+                        reportFiles: 'ExtentReport_*.html',
                         reportName: 'Extent Report'
                     ])
                 }
@@ -49,8 +48,9 @@ pipeline {
     post {
         always {
             dir('Automation') {
+                // Archive screenshots, even if the directory is empty.
                 archiveArtifacts artifacts: '**/Screenshots/*.png', allowEmptyArchive: true
-                junit '**/test-output/junitreports/*.xml'
+                // ❌ Removed junit collection step
             }
         }
     }
