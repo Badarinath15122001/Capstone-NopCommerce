@@ -77,7 +77,7 @@ pipeline {
         // This block runs if any stage fails.
         failure {
             // Note: Update 'your-email@example.com' to your actual email.
-            mail to: 'your-email@example.com',
+            mail to: 'badarinath15122001@gmail.com',
                  subject: "Build Failed in Jenkins: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "Check Jenkins console and reports."
         }
