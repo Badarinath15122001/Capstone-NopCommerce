@@ -13,6 +13,22 @@ pipeline {
             }
         }
 
+        stage('Auto Commit to GitHub') {
+            steps {
+                dir('Automation') {
+                    withCredentials([usernamePassword(credentialsId: 'capstone', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                        bat '''
+                            git config user.name "Jenkins"
+                            git config user.email "jenkins@yourdomain.com"
+                            git add .
+                            git commit -m "Auto commit by Jenkins" || echo "No changes to commit"
+                            git push https://%GIT_USER%:%GIT_PASS%@github.com/Badarinath15122001/Capstone-NopCommerce.git HEAD:master
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Build and Run Single Test') {
             steps {
                 dir('Automation') {
@@ -27,14 +43,12 @@ pipeline {
                 dir('Automation') {
                     echo 'Publishing HTML reports...'
 
-                    // Publish TestNG HTML report
                     publishHTML(target: [
                         reportDir: 'test-output',
                         reportFiles: 'emailable-report.html',
                         reportName: 'TestNG Report'
                     ])
 
-                    // Publish Extent Report
                     publishHTML(target: [
                         reportDir: 'reports/ExtentReports',
                         reportFiles: 'ExtentReport_*.html',
@@ -48,9 +62,7 @@ pipeline {
     post {
         always {
             dir('Automation') {
-                // Archive screenshots, even if the directory is empty.
                 archiveArtifacts artifacts: '**/Screenshots/*.png', allowEmptyArchive: true
-                // ❌ Removed junit collection step
             }
         }
     }
