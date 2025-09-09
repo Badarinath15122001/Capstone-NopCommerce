@@ -47,11 +47,31 @@ public class HomePageTest {
     }
     @Test
     public void verifyTwitterLink() throws InterruptedException {
-        try { Thread.sleep(5000); } catch (InterruptedException e) { e.printStackTrace(); }
-        String twitterUrl = homePage.getTwitterLink();
-        Assert.assertEquals(twitterUrl, "https://twitter.com/nopCommerce", "❌ Twitter link is incorrect!");
-        System.out.println("✅ Twitter link verified: " + twitterUrl);
+        // Click on the Twitter icon
+        homePage.clickTwitterIcon();
+
+        // Get current window handle (main window)
+        String mainWindow = driver.getWindowHandle();
+
+        // Switch to the new tab/window
+        for (String handle : driver.getWindowHandles()) {
+            if (!handle.equals(mainWindow)) {
+                driver.switchTo().window(handle);
+                break;
+            }
+        }
+
+        // Verify the URL of the new tab
+        String currentUrl = driver.getCurrentUrl();
+        Assert.assertEquals(currentUrl, "https://x.com/nopCommerce", "❌ Twitter link is incorrect!");
+
+        System.out.println("✅ Twitter link verified: " + currentUrl);
+
+        // Close the Twitter tab and switch back to main window
+        driver.close();
+        driver.switchTo().window(mainWindow);
     }
+
 
     @AfterMethod
     public void tearDown() {

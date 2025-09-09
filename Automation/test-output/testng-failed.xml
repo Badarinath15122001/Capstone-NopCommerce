@@ -3,14 +3,14 @@
 <suite name="Failed suite [Default suite]" guice-stage="DEVELOPMENT">
   <test thread-count="5" name="Default test(failed)">
     <classes>
-      <class name="tests.CheckoutTest">
+      <class name="tests.HomePageTest">
         <methods>
-          <include name="downloadInvoiceAfterCheckout"/>
-          <include name="tearDown"/>
-          <include name="checkoutAsGuestWithCreditCard"/>
+          <include name="verifyTwitterLink"/>
           <include name="setUp"/>
+          <include name="verifySearchWorks"/>
+          <include name="tearDown"/>
         </methods>
-      </class> <!-- tests.CheckoutTest -->
+      </class> <!-- tests.HomePageTest -->
     </classes>
   </test> <!-- Default test(failed) -->
 </suite> <!-- Failed suite [Default suite] -->

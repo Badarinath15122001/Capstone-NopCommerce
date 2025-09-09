@@ -39,8 +39,10 @@ public class HomePage {
         searchInput.sendKeys(product);
         driver.findElement(searchButton).click();
     }
-    public String getTwitterLink() {
-        WebElement twitter = wait.until(ExpectedConditions.visibilityOfElementLocated(twitterLink));
-        return twitter.getAttribute("href");
+ // In HomePage.java
+    public void clickTwitterIcon() {
+        WebElement twitterIcon = driver.findElement(By.cssSelector("a[href*='twitter.com/nopCommerce']"));
+        twitterIcon.click();
     }
+
 }
