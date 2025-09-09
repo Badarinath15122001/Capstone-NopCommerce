@@ -12,7 +12,7 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/Badarinath15122001/Capstone-NopCommerce.git'
             }
         }
-
+//hello
         stage('Auto Commit to GitHub') {
             steps {
                 dir('Automation') {
