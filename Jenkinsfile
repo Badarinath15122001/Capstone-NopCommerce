@@ -1,0 +1,89 @@
+pipeline {
+    agent any
+
+    environment {
+        BRANCH_NAME = 'main'   // your repo default is main, not master
+        ECLIPSE_WORKSPACE = 'C:\\Users\\badar\\git\\repository2\\Automation'
+        COMMIT_MESSAGE = 'Jenkins: Auto-commit after build'
+    }
+
+    tools {
+        // Jenkins will auto-install these from Global Tool Configuration
+        maven 'M3'   // Name must match "Maven" installation in Jenkins (e.g. Maven 3.8.6)
+        jdk   'jdk21' // Name must match the JDK installation you configure in Jenkins
+    }
+
+    triggers {
+        pollSCM('H/5 * * * *')   // every 5 minutes
+    }
+
+    stages {
+        stage('Checkout from Git') {
+            steps {
+                git branch: "${env.BRANCH_NAME}",
+                    url: 'https://github.com/Badarinath15122001/Capstone-NopCommerce.git'
+            }
+        }
+
+        stage('Copy Files from Eclipse Workspace') {
+            steps {
+                bat """
+                echo Copying files from Eclipse workspace...
+                xcopy /E /Y /I "${ECLIPSE_WORKSPACE}\\*" "."
+                """
+            }
+        }
+
+        stage('Build & Run LoginTest.java Only') {
+            steps {
+                // Runs just LoginTest.java instead of testng.xml
+                bat 'mvn clean -Dtest=LoginTest test'
+            }
+        }
+
+        stage('Commit & Push Changes') {
+            steps {
+                script {
+                    echo 'Checking for changes to push...'
+                    withCredentials([usernamePassword(
+                        credentialsId: 'capstone',
+                        usernameVariable: 'GIT_USER',
+                        passwordVariable: 'GIT_TOKEN')]) {
+
+                        bat """
+                            git config user.email "jenkins@pipeline.com"
+                            git config user.name "Jenkins CI"
+
+                            git status
+                            git add .
+
+                            REM Commit only if there are changes
+                            git diff --cached --quiet || git commit -m "${COMMIT_MESSAGE}"
+
+                            REM Push using token
+                            git push https://%GIT_USER%:%GIT_TOKEN%@github.com/Badarinath15122001/Capstone-NopCommerce.git ${BRANCH_NAME}
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '/Screenshots/*.png', allowEmptyArchive: true
+
+            publishHTML(target: [
+                reportDir: 'test-output',
+                reportFiles: 'emailable-report.html',
+                reportName: 'TestNG Report'
+            ])
+
+            publishHTML(target: [
+                reportDir: 'reports/ExtentReports',
+                reportFiles: 'ExtentReport_*.html',
+                reportName: 'Extent Report'
+            ])
+        }
+    }
+}

@@ -1,0 +1,10 @@
+tests\RegisterTest.class
+tests\CartTest.class
+runners\LoginRunner.class
+stepdefinitions\LoginSteps.class
+tests\CheckoutTest.class
+tests\HomePageTest.class
+tests\WishlistTest.class
+tests\BaseTest.class
+tests\LoginTest.class
+tests\ProductTest.class
