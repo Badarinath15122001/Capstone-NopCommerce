@@ -10,7 +10,7 @@ pipeline {
         // Your Eclipse project folder
         ECLIPSE_WORKSPACE = 'C:\\Users\\badar\\git\\repository2\\Automation'
         COMMIT_MESSAGE = 'Jenkins: Auto-commit after build'
-        BRANCH = 'master'   // changed from 'main' to 'master'
+        BRANCH = 'master'   // using master branch
     }
 
     triggers {
@@ -53,6 +53,10 @@ pipeline {
                             git add .
                             git diff --cached --quiet || git commit -m "${COMMIT_MESSAGE}"
 
+                            REM Pull latest changes from remote before pushing
+                            git pull https://%GIT_USER%:%GIT_PASS%@github.com/Badarinath15122001/Capstone-NopCommerce.git ${BRANCH} --rebase
+
+                            REM Push changes back to remote
                             git push https://%GIT_USER%:%GIT_PASS%@github.com/Badarinath15122001/Capstone-NopCommerce.git HEAD:${BRANCH}
                         """
                     }
