@@ -1,69 +1,86 @@
 pipeline {
     agent any
-
-    tools {
-        maven 'M3'
-        jdk 'jdk21'
+ 
+    environment {
+        BRANCH_NAME = 'master'
+        ECLIPSE_WORKSPACE = 'C:\\Users\\badar\\git\\repository2\\Automation'
+        COMMIT_MESSAGE = 'Jenkins: Auto-commit after build'
     }
-
+ 
+    // Auto-trigger every 5 mins on Git changes
+    triggers {
+        pollSCM('H H * * *')
+    }
+ 
     stages {
-        stage('Checkout') {
+        stage('Checkout from Git') {
             steps {
-                git branch: 'master', url: 'https://github.com/Badarinath15122001/Capstone-NopCommerce.git'
+                git branch: "${env.BRANCH_NAME}",
+                    url: 'https://github.com/Badarinath15122001/Capstone-NopCommerce.git'
             }
         }
-//hello
-        stage('Auto Commit to GitHub') {
+ 
+        stage('Copy Files from Eclipse Workspace') {
             steps {
-                dir('Automation') {
-                    withCredentials([usernamePassword(credentialsId: 'capstone', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                        bat '''
-                            git config user.name "Jenkins"
-                            git config user.email "jenkins@yourdomain.com"
+                bat """
+                echo Copying files from Eclipse workspace...
+                xcopy /E /Y /I "${ECLIPSE_WORKSPACE}\\*" "."
+                """
+            }
+        }
+ 
+        stage('Build & Test') {
+            steps {
+                bat 'mvn clean test -DsuiteXmlFile=testng.xml'
+            }
+        }
+ 
+        stage('Commit & Push Changes') {
+            steps {
+                script {
+                    echo 'Checking for changes to push...'
+                    withCredentials([usernamePassword(
+                        credentialsId: 'capstone',
+                        usernameVariable: 'GIT_USER',
+                        passwordVariable: 'GIT_TOKEN')]) {
+ 
+                        bat """
+                            git config user.email "jenkins@pipeline.com"
+                            git config user.name "Jenkins CI"
+ 
+                            git status
                             git add .
-                            git commit -m "Auto commit by Jenkins" || echo "No changes to commit"
-                            git push https://%GIT_USER%:%GIT_PASS%@github.com/Badarinath15122001/Capstone-NopCommerce.git HEAD:master
-                        '''
+ 
+                            REM Commit only if there are changes
+                            git diff --cached --quiet || git commit -m "${COMMIT_MESSAGE}"
+ 
+                            REM Push using token
+                            git push https://%GIT_USER%:%GIT_TOKEN%@github.com/Badarinath15122001/Capstone-NopCommerce.git ${BRANCH_NAME}
+                        """
                     }
                 }
             }
         }
-
-        stage('Build and Run Single Test') {
-            steps {
-                dir('Automation') {
-                    echo 'Running only LoginTest...'
-                    bat 'mvn -Dtest=tests.LoginTest test'
-                }
-            }
-        }
-
-        stage('Publish Reports') {
-            steps {
-                dir('Automation') {
-                    echo 'Publishing HTML reports...'
-
-                    publishHTML(target: [
+    }
+ 
+    post {
+        always {
+            // Archive screenshots
+            archiveArtifacts artifacts: '/Screenshots/*.png', allowEmptyArchive: true
+ 
+            // Publish Cucumber Report
+            publishHTML(target: [
                         reportDir: 'test-output',
                         reportFiles: 'emailable-report.html',
                         reportName: 'TestNG Report'
                     ])
 
-                    publishHTML(target: [
+            publishHTML(target: [
                         reportDir: 'reports/ExtentReports',
                         reportFiles: 'ExtentReport_*.html',
                         reportName: 'Extent Report'
                     ])
-                }
-            }
-        }
-    }
 
-    post {
-        always {
-            dir('Automation') {
-                archiveArtifacts artifacts: '/Screenshots/*.png', allowEmptyArchive: true
-            }
         }
     }
 }
