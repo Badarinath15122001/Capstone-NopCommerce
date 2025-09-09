@@ -10,7 +10,7 @@ pipeline {
     tools {
         // Jenkins will auto-install these from Global Tool Configuration
         maven 'M3'   // Name must match "Maven" installation in Jenkins (e.g. Maven 3.8.6)
-        jdk   'JDK11' // Name must match the JDK installation you configure in Jenkins
+        jdk   'jdk21' // Name must match the JDK installation you configure in Jenkins
     }
 
     triggers {
