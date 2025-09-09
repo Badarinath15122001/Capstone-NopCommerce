@@ -6,7 +6,7 @@ pipeline {
         ECLIPSE_WORKSPACE = 'C:\\Users\\badar\\git\\repository2\\Automation'
         COMMIT_MESSAGE = 'Jenkins: Auto-commit after build'
     }
- 
+
     // Auto-trigger every 5 mins on Git changes
     triggers {
         pollSCM('H H * * *')
